@@ -1,0 +1,21 @@
+{
+  "name": "solid-localhost-pod",
+  "version": "0.1.0",
+  "description": "Use your filesystem as a local solid pod in the browser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "solid",
+    "pod"
+  ],
+  "author": "Otto-AA",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "https-localhost": "^4.4.1",
+    "solid-rest": "^1.0.7"
+  }
+}
