@@ -88,7 +88,17 @@ async function setStatus(name, status) {
     updateDisplay()
 }
 
-function deletePod(name) {
+async function deletePod(name) {
+    const res = await fetch('/delete_pod', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+        headers: {
+            'content-type': 'application/json'
+        }
+    })
+    if (!res.ok) {
+        throw new Error(res)
+    }
     pods = pods.filter(pod => pod.name !== name)
     updateDisplay()
 }

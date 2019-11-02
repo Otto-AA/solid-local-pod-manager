@@ -65,6 +65,7 @@ app.post('/activate_pod', (req, res, next) => {
 })
 
 app.post('/delete_pod', (req, res, next) => {
+    const { name } = req.body
     if (pods[name].isListening())
         pods[name].stopListening()
 
