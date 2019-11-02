@@ -108,7 +108,7 @@ class LocalPod {
         // Sanity check for making sure that the mapped path is in the basePath (ie no unexpected file is accessed)
         const relative = path.relative(this.basePath, mappedPath)
         if (relative && relative.startsWith('..')) {
-            throw 'Invalid path' // TODO
+            throw new Error('Invalid path')
         }
         return `${this.prefix}${mappedPath}`
     }

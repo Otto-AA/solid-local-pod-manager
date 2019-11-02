@@ -6,20 +6,10 @@ const mime = require('mime-types')
 
 const { DataFactory: { namedNode, literal, defaultGraph, quad } } = N3;
 const prefixes = {
-    // TODO
     ldp: 'http://www.w3.org/ns/ldp#',
     terms: 'http://purl.org/dc/terms/',
     XML: 'http://www.w3.org/2001/XMLSchema#',
     st: 'http://www.w3.org/ns/posix/stat#'
-}
-
-/**
- * @param {string} path - starting with file:// TODO Check
- * @param {object} [options]
- */
-
-const defaultOptions = {
-    method: 'GET'
 }
 
 function placeholder(reqPath, options) {
@@ -38,9 +28,7 @@ const methodHandlers = {
     DELETE: assertNot404(_delete)
 }
 
-async function fetch(reqPath, options) {
-    options = { ...defaultOptions, ...options }
-
+async function fetch(reqPath, options = { method: 'GET' }) {
     const { method } = options
     const handler = methodHandlers[method.toUpperCase()]
 
@@ -121,10 +109,17 @@ async function post(reqPath, options) {
     if (!link)
         return badRequestResponse('POST must contain a link header')
 
-    const itemPath = path.join(reqPath, slug)
+    let itemPath = path.join(reqPath, slug)
     if (link.match('BasicContainer')) {
         return createDirectory(itemPath)
     } else if (link.match('Resource')) {
+        if (!path.extname(itemPath)) {
+            const contentType = options.headers['content-type']
+            const ext = mime.extension(contentType)
+            if (typeof ext === 'string') {
+                itemPath += `.${ext}`
+            }
+        }
         return createResource(itemPath, options)
     } else {
         return badRequestResponse('POST must contain a valid link header')
@@ -137,11 +132,13 @@ async function createDirectory(dirPath) {
 }
 
 async function createResource(itemPath, options) {
-    // TODO: Handle content type
-    // TODO: Set proper headers
     const { body } = options
     await fs.promises.writeFile(itemPath, body)
-    return new Response('File created', { status: 201 })
+    return new Response('File created', {
+        status: 201,
+        url: itemPath,
+        headers: { location: itemPath }
+    })
 }
 
 async function put(reqPath, options) {
