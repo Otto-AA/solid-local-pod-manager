@@ -1,5 +1,5 @@
 {
-  "name": "solid-localhost-pod",
+  "name": "solid-local-pod-manager",
   "version": "0.1.0",
   "description": "Use your filesystem as a local solid pod in the browser",
   "main": "index.js",
@@ -13,12 +13,13 @@
   "author": "Otto-AA",
   "license": "MIT",
   "dependencies": {
-    "cors": "^2.8.5",
     "express": "^4.17.1",
     "https-localhost": "^4.4.1",
     "mime-types": "^2.1.24",
     "n3": "^1.3.0",
+    "nconf": "^0.10.0",
     "node-fetch": "^2.6.0",
+    "solid-local-pod": "github:otto-aa/solid-local-pod",
     "solid-rest": "^1.0.7"
   }
 }
