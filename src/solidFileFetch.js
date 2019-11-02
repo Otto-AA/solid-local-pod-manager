@@ -2,6 +2,7 @@ const { Response } = require('node-fetch')
 const N3 = require('n3')
 const fs = require('fs')
 const path = require('path')
+const mime = require('mime-types')
 
 const { DataFactory: { namedNode, literal, defaultGraph, quad } } = N3;
 const prefixes = {
@@ -60,10 +61,18 @@ async function get(reqPath, options) {
         const content = stats.isDirectory() ?
             await getDirectoryContent(reqPath)
             : await getFileContent(reqPath)
+        const contentType = stats.isDirectory() ?
+            'text/turtle'
+            : mime.contentType(reqPath)
 
         const resOptions = {
             status: 200,
+            headers: {}
         }
+        if (contentType) {
+            resOptions.headers['content-type'] = contentType
+        }
+
         return new Response(content, resOptions)
     } catch (err) {
         console.error(err)
