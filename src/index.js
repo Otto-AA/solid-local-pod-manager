@@ -5,25 +5,32 @@ const httpsLocalhost = require('https-localhost')()
 const nconf = require('nconf')
 
 const port = 2700
-let cert = null
 const getCerts = async () => {
-    if (!cert)
-        cert = await httpsLocalhost.getCerts()
-    return cert
+    if (!nconf.get('cert')) {
+        console.log('generating new certificate')
+        const newCerts = await httpsLocalhost.getCerts()
+        nconf.set('cert', newCerts)
+        return newCerts
+    } else {
+        const serializedCert = nconf.get('cert')
+        serializedCert.key = Buffer.from(serializedCert.key)
+        serializedCert.cert = Buffer.from(serializedCert.cert)
+        return serializedCert
+    }
 }
 
 const app = express()
 app.use(express.static(__dirname + '/LocalPodManagerUI'))
 app.use(verifyHost, express.json())
 app.listen(port, () => {
-    console.log('Listening on port ' + port)
+    console.log(`The app is available at http://localhost:${port}`)
 })
 
 
 /** @type {Object.<string, LocalPod>} */
 const pods = {}
-nconf.use('file', { file: './pods.json' })
-nconf.defaults({ pods: {} })
+nconf.use('file', { file: './storage.json' })
+nconf.defaults({ pods: {}, cert: null })
 nconf.load(() => initPods())
 
 
