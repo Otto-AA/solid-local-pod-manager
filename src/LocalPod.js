@@ -10,6 +10,7 @@ const https = require('https')
  * @property {string} basePath
  * @property {any} certs
  * @property {function} fetch
+ * @property {string} [prefix]
  */
 
 class LocalPod {
@@ -21,6 +22,7 @@ class LocalPod {
         this.basePath = config.basePath
         this.certs = config.certs
         this.fetch = config.fetch
+        this.prefix = config.prefix || ''
         this.isListening = false
         this.app = express()
         this.app.use(cors())
@@ -98,7 +100,7 @@ class LocalPod {
         if (relative && relative.startsWith('..')) {
             throw 'Invalid path' // TODO
         }
-        return `file://${mappedPath}` // TODO: Make this library independent?
+        return `${this.prefix}${mappedPath}`
     }
 }
 

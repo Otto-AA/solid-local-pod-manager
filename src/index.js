@@ -3,7 +3,7 @@ const LocalPod = require('./LocalPod')
 const SolidRest = require('solid-rest')
 const FileHandler = require('solid-rest/src/file')
 const solidRest = new SolidRest([new FileHandler])
-
+const solidFileFetch = require('./solidFileFetch')
 
 async function main() {
     // TODO: Check if there is a better way to run localhost via https
@@ -14,14 +14,15 @@ async function main() {
         port: 3000,
         basePath: '/home/a_a/test',
         certs,
-        fetch
+        fetch: solidFileFetch
     }).startListening()
 
     new LocalPod({
         port: 4000,
-        basePath: '/home/a_a/test_uni',
+        basePath: '/home/a_a/test',
         certs,
-        fetch
+        fetch,
+        prefix: 'file://'
     }).startListening()
 }
 main()
