@@ -26,7 +26,8 @@ class LocalPod {
         this.isListening = false
         this.app = express()
         this.app.use(cors())
-        this.app.all('*', express.text(), this.handleRequest.bind(this)) // TODO: Add support for binary, form-encoded, etc.
+        this.app.use(express.raw({ type: '*/*' }))
+        this.app.all('*', this.handleRequest.bind(this)) // TODO: Add support for binary, form-encoded, etc.
         this.server = null
     }
 
@@ -53,10 +54,12 @@ class LocalPod {
     }
 
     async handleRequest(req, res, next) {
-        // TODO: Add support for custom fetching library (instead of hardcoding solid-rest)
         try {
             const { url, method, headers, body } = req
             const path = this.mapPath(url)
+            if (method.toUpperCase() === 'DELETE' && this.isRoot(path))
+                return res.status(403).send()
+
             const response = await this.fetch(path, { method, headers, body })
             for (const [key, val] of response.headers.entries()) {
                 if (this.isAllowedHeader(key, val))
@@ -86,6 +89,13 @@ class LocalPod {
             return false
 
         return true
+    }
+
+    /**
+     * @param {string} reqPath 
+     */
+    isRoot(reqPath) {
+        return path.relative(this.basePath, reqPath) === ''
     }
 
     /**
