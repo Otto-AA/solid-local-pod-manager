@@ -28,7 +28,6 @@ function placeholder(reqPath, options) {
 
 const head = placeholder
 const options = placeholder
-const put = placeholder
 
 const methodHandlers = {
     HEAD: assertNot404(head),
@@ -61,10 +60,7 @@ async function get(reqPath, options) {
 
 async function getDirectory(reqPath, options) {
     if (options.headers.accept && !options.headers.accept.match('text/turtle') && options.headers.accept.match('text/html')) {
-        return new Response(mashlib, {
-            status: 200,
-            headers: { 'content-type': 'text/html' }
-        })
+        return getDirectoryView(reqPath, options)
     }
     const content = await getDirectoryContent(reqPath)
     const resOptions = {
@@ -72,6 +68,18 @@ async function getDirectory(reqPath, options) {
         headers: { 'content-type': 'text/turtle' }
     }
     return new Response(content, resOptions)
+}
+
+async function getDirectoryView(reqPath, options) {
+    const defaultFile = path.join(reqPath, 'index.html')
+    if (await itemExists(defaultFile)) {
+        return getFile(defaultFile, options)
+    } else {
+        return new Response(mashlib, {
+            status: 200,
+            headers: { 'content-type': 'text/html' }
+        })
+    }
 }
 
 async function getFile(reqPath, options) {
@@ -136,15 +144,24 @@ async function createResource(itemPath, options) {
     return new Response('File created', { status: 201 })
 }
 
+async function put(reqPath, options) {
+    const container = path.dirname(reqPath)
+     // TODO: Check if this results in an error on windows
+     // >> On Windows, using fs.mkdir() on the root directory even with recursion will result in an error:
+    await fs.promises.mkdir(container, { recursive: true })
+    return createResource(reqPath, options)
+}
+
 function assertNot404(handler) {
     return async (reqPath, options) => {
-        try {
-            await fs.promises.access(reqPath, fs.constants.R_OK)
-        } catch (err) {
-            return notFoundResponse()
-        }
-        return handler(reqPath, options)
+        if (await itemExists(reqPath))
+            return handler(reqPath, options)
+        return notFoundResponse()
     }
+}
+
+function itemExists(path) {
+    return new Promise((resolve) => fs.access(path, err => err ? resolve(false) : resolve(true)))
 }
 
 function isDirectory(reqPath) {
