@@ -16,7 +16,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "https-localhost": "^4.4.1",
-    "nconf": "^0.10.0",
+    "nconf": "^0.11.4",
     "solid-local-pod": "^0.2.1"
   }
 }
